@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dream Garage">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Dream Garage｜Sportage 存車計畫</title>
+<style>
+:root{--bg:#090d12;--panel:#121923;--panel2:#18222f;--line:#273444;--text:#f7f8fa;--muted:#95a2b3;--lime:#d6ff45;--lime2:#a9dc20;--red:#ff6b6b;--blue:#8ab4ff;--shadow:0 18px 50px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Noto Sans TC",sans-serif}
+body{background:radial-gradient(circle at 90% 0%,rgba(214,255,69,.08),transparent 28%),linear-gradient(180deg,#080c11,#101721 55%,#080c11)}
+.app{max-width:560px;margin:auto;min-height:100vh;padding:calc(14px + env(safe-area-inset-top)) 14px calc(88px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;margin:6px 2px 16px}.brand small{color:var(--muted);font-weight:800;letter-spacing:1.3px}.brand h1{margin:3px 0 0;font-size:25px}.badge{font-size:12px;font-weight:900;padding:8px 10px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;color:var(--lime)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:17px;box-shadow:var(--shadow)}
+.hero{background:radial-gradient(circle at 78% 5%,rgba(214,255,69,.19),transparent 32%),var(--panel)}
+.carstage{height:150px;border-radius:18px;background:linear-gradient(180deg,#18212d,#0c1219);position:relative;overflow:hidden;display:grid;place-items:center;margin-bottom:15px}
+.car{font-size:78px;transform:translateY(4px);filter:grayscale(1) brightness(.75);transition:.4s}.car.on{filter:none}.glow{position:absolute;width:220px;height:30px;border-radius:50%;background:rgba(214,255,69,.18);filter:blur(13px);bottom:18px}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:flex-end}.muted{color:var(--muted)}.money{font-size:34px;font-weight:900;letter-spacing:-1.3px}.pct{font-size:30px;font-weight:900;color:var(--lime)}
+.bar{height:11px;border-radius:99px;background:#25303e;overflow:hidden;margin:15px 0 8px}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--lime2),var(--lime));transition:.4s}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:14px}.stat small{display:block;color:var(--muted);margin-bottom:6px}.stat strong{font-size:18px}
+.section{margin-top:20px}.title{display:flex;justify-content:space-between;align-items:center;margin:0 2px 9px}.title h2{font-size:17px;margin:0}.title span{font-size:12px;color:var(--muted)}
+input,select{width:100%;padding:12px 13px;border-radius:12px;background:#0d141c;border:1px solid var(--line);color:var(--text);font-size:15px;outline:none}input:focus,select:focus{border-color:var(--lime2)}
+label{font-size:12px;color:var(--muted);display:block;margin:0 0 5px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin-bottom:10px}
+button{border:0;border-radius:13px;padding:12px 14px;font-size:14px;font-weight:900;cursor:pointer}.primary{width:100%;background:var(--lime);color:#111}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:transparent;color:var(--red);border:1px solid rgba(255,107,107,.3)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.quick button{padding:10px 5px;background:var(--panel2);color:var(--text);border:1px solid var(--line);font-size:12px}
+.list{display:flex;flex-direction:column;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#0d141c;border:1px solid var(--line);border-radius:14px;padding:11px}.item strong{display:block}.item small{color:var(--muted)}.plus{color:#8fe18e}
+canvas{display:block;width:100%;height:220px;background:#0d141c;border-radius:14px}
+.miles{display:flex;flex-direction:column;gap:12px}.mile{display:grid;grid-template-columns:34px 1fr;gap:10px}.dot{height:30px;width:30px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-weight:900}.mile.done .dot{background:var(--lime);color:#111}.mile h3{font-size:14px;margin:2px 0}.mile p{font-size:12px;color:var(--muted);margin:0;line-height:1.45}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(10,15,21,.93);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));z-index:20}.tab{background:transparent;color:var(--muted);font-size:11px;padding:8px 2px}.tab b{display:block;font-size:20px;margin-bottom:2px}.tab.active{color:var(--lime)}
+.page{display:none}.page.active{display:block}.note{font-size:11px;color:var(--muted);line-height:1.55}.kpi{font-size:25px;font-weight:900}.loanResult{font-size:13px;line-height:1.7;background:#0d141c;border-radius:14px;padding:12px;margin-top:10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.install{display:none;margin-bottom:10px}
+</style>
+</head>
+<body><div class="app">
+<header><div class="brand"><small>DREAM GARAGE</small><h1>Sportage 存車計畫</h1></div><div class="badge" id="startBadge">2026.09 START</div></header>
+<button id="installBtn" class="primary install">加入主畫面</button>
+
+<section id="home" class="page active">
+<div class="panel hero">
+ <div class="carstage"><div class="glow"></div><div class="car" id="car">🚙</div></div>
+ <div class="row"><div><div class="muted">目前累積</div><div class="money" id="saved">$0</div></div><div class="pct" id="pct">0%</div></div>
+ <div class="bar"><div class="fill" id="fill"></div></div>
+ <div class="meta"><span id="remaining">還差 $500,000</span><span id="eta">預估 2028/09</span></div>
+</div>
+<div class="grid">
+ <div class="stat"><small>目前平均月存</small><strong id="avg">$20,000</strong></div>
+ <div class="stat"><small>預估還需</small><strong id="leftMonths">25 個月</strong></div>
+ <div class="stat"><small>今日若購車貸款</small><strong id="loanNow">$949,000</strong></div>
+ <div class="stat"><small>估算月付</small><strong id="loanPayment">$12,xxx</strong></div>
+</div>
+<div class="section"><div class="title"><h2>達標路線</h2><span>自動依速度更新</span></div>
+<div class="panel miles">
+ <div class="mile" id="mile1"><div class="dot">1</div><div><h3>第一筆安全墊｜$100,000</h3><p id="mile1t"></p></div></div>
+ <div class="mile" id="mile2"><div class="dot">2</div><div><h3>頭期款完成｜$400,000</h3><p id="mile2t"></p></div></div>
+ <div class="mile" id="mile3"><div class="dot">3</div><div><h3>理想購車資金｜$500,000</h3><p id="mile3t"></p></div></div>
+</div></div>
+</section>
+
+<section id="save" class="page">
+<div class="section"><div class="title"><h2>新增存款</h2><span>固定＋月底剩餘＋獎金</span></div>
+<div class="panel">
+ <div class="quick">
+  <button onclick="preset('固定存款',20000)">固定 2萬</button>
+  <button onclick="preset('月底剩餘',0)">月底剩餘</button>
+  <button onclick="preset('獎金',0)">獎金</button>
+ </div>
+ <div class="fields"><div class="field"><label>月份</label><input type="month" id="entryMonth" value="2026-09"></div><div class="field"><label>金額</label><input type="number" id="entryAmount" inputmode="numeric" placeholder="20000"></div></div>
+ <div class="field"><label>分類</label><select id="entryType"><option>固定存款</option><option>月底剩餘</option><option>獎金</option><option>其他收入</option></select></div>
+ <div class="field"><label>備註</label><input id="entryNote" placeholder="例：年終獎金全部投入"></div>
+ <button class="primary" onclick="addEntry()">＋ 存進 Dream Garage</button>
+</div></div>
+<div class="section"><div class="title"><h2>存款紀錄</h2><span id="count">0 筆</span></div><div id="entries" class="list"></div></div>
+</section>
+
+<section id="stats" class="page">
+<div class="grid">
+ <div class="stat"><small>累積存款</small><div class="kpi" id="sTotal">$0</div></div>
+ <div class="stat"><small>最高單月</small><div class="kpi" id="sBest">$0</div></div>
+</div>
+<div class="section"><div class="title"><h2>每月累積趨勢</h2><span>目標 $500,000</span></div><div class="panel"><canvas id="chart" width="640" height="240"></canvas></div></div>
+<div class="section"><div class="title"><h2>如果多存一點</h2><span>即時模擬</span></div>
+<div class="panel">
+ <label>每月額外多存</label><input type="range" min="0" max="20000" step="1000" value="5000" id="extraRange" oninput="renderSimulator()">
+ <p><strong id="extraAmt">$5,000 / 月</strong></p><p class="note" id="simText"></p>
+</div></div>
+</section>
+
+<section id="settings" class="page">
+<div class="section"><div class="title"><h2>購車與貸款設定</h2><span>可隨車價更新</span></div>
+<div class="panel">
+ <div class="fields"><div class="field"><label>車價</label><input type="number" id="carPrice"></div><div class="field"><label>頭期款目標</label><input type="number" id="downTarget"></div></div>
+ <div class="fields"><div class="field"><label>安全預備金</label><input type="number" id="reserveTarget"></div><div class="field"><label>每月最低存款</label><input type="number" id="baseMonthly"></div></div>
+ <div class="fields"><div class="field"><label>車貸年利率 (%)</label><input type="number" step=".1" id="loanRate"></div><div class="field"><label>貸款年限</label><select id="loanYears"><option>5</option><option>6</option><option selected>7</option><option>8</option></select></div></div>
+ <button class="primary" onclick="saveSettings()">儲存設定</button>
+ <div class="loanResult" id="loanResult"></div>
+</div></div>
+
+<div class="section"><div class="title"><h2>資料庫與同步</h2><span>IndexedDB</span></div>
+<div class="panel">
+ <p class="note">資料預設存在此裝置的 IndexedDB，可離線使用。跨裝置雲端同步需要後端帳號；此版本先提供完整 JSON 備份／還原，資料格式已為未來雲端同步預留。</p>
+ <div class="actions"><button class="secondary" onclick="exportBackup()">匯出備份</button><button class="secondary" onclick="document.getElementById('restoreFile').click()">還原備份</button></div>
+ <input id="restoreFile" type="file" accept="application/json" style="display:none" onchange="importBackup(event)">
+</div></div>
+<div class="section"><div class="panel"><button class="danger" style="width:100%" onclick="clearData()">清除全部資料</button></div></div>
+</section>
+</div>
+
+<nav class="tabs">
+<button class="tab active" onclick="go('home',this)"><b>🏠</b>首頁</button>
+<button class="tab" onclick="go('save',this)"><b>＋</b>存錢</button>
+<button class="tab" onclick="go('stats',this)"><b>📈</b>分析</button>
+<button class="tab" onclick="go('settings',this)"><b>⚙️</b>設定</button>
+</nav>
+
+<script>
+const DB='dreamGarageDB', VER=1; let db;
+let settings={startMonth:'2026-09',carPrice:1349000,downTarget:400000,reserveTarget:100000,baseMonthly:20000,loanRate:2.8,loanYears:7};
+let entries=[];
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,VER);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('entries'))d.createObjectStore('entries',{keyPath:'id'});if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'key'});};r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
+function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store)}
+function reqP(r){return new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function load(){const s=await reqP(tx('settings').get('main'));if(s?.value)settings={...settings,...s.value};entries=await reqP(tx('entries').getAll());renderAll()}
+async function putSettings(){await reqP(tx('settings','readwrite').put({key:'main',value:settings}))}
+async function addEntry(){let amount=Number(entryAmount.value),month=entryMonth.value,type=entryType.value,note=entryNote.value.trim();if(!month||amount<=0)return alert('請輸入月份與金額');let e={id:crypto.randomUUID(),month,amount,type,note,createdAt:Date.now()};await reqP(tx('entries','readwrite').put(e));entries.push(e);entryAmount.value='';entryNote.value='';renderAll()}
+async function delEntry(id){await reqP(tx('entries','readwrite').delete(id));entries=entries.filter(x=>x.id!==id);renderAll()}
+function preset(t,a){entryType.value=t;entryAmount.value=a||'';entryAmount.focus()}
+function total(){return entries.reduce((s,e)=>s+Number(e.amount),0)}
+function byMonth(){let m={};entries.forEach(e=>m[e.month]=(m[e.month]||0)+Number(e.amount));return m}
+function average(){let v=Object.values(byMonth());return v.length?v.reduce((a,b)=>a+b,0)/v.length:Number(settings.baseMonthly)}
+function target(){return Number(settings.downTarget)+Number(settings.reserveTarget)}
+function midx(s){let[y,m]=s.split('-').map(Number);return y*12+m-1}
+function mstr(i){return `${Math.floor(i/12)}/${String(i%12+1).padStart(2,'0')}`}
+function eta(goal,speed=average()){let rem=goal-total();if(rem<=0)return '已達標';let months=Math.ceil(rem/Math.max(speed,1));let base=entries.length?Math.max(...entries.map(e=>midx(e.month))):midx(settings.startMonth)-1;return mstr(base+months)}
+function fmt(n){return '$'+Math.max(0,Math.round(n)).toLocaleString('zh-TW')}
+function payment(principal){let n=Number(settings.loanYears)*12,r=Number(settings.loanRate)/100/12;if(principal<=0)return 0;if(!r)return principal/n;return principal*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1)}
+function renderAll(){let t=total(),g=target(),p=Math.min(100,t/g*100),avg=average(),left=Math.max(0,Math.ceil((g-t)/Math.max(avg,1)));saved.textContent=fmt(t);pct.textContent=p.toFixed(p<10?1:0)+'%';fill.style.width=p+'%';remaining.textContent=t>=g?'購車資金已達標':'還差 '+fmt(g-t);eta.textContent='預估 '+etaFn(g);document.getElementById('car').className='car'+(p>=100?' on':'');document.getElementById('avg').textContent=fmt(avg);leftMonths.textContent=left+' 個月';startBadge.textContent=settings.startMonth.replace('-','.')+' START';
+ let loan=Math.max(0,Number(settings.carPrice)-Math.min(t,Number(settings.downTarget)));loanNow.textContent=fmt(loan);loanPayment.textContent=fmt(payment(loan));
+ [ [100000,'mile1','mile1t'],[Number(settings.downTarget),'mile2','mile2t'],[g,'mile3','mile3t'] ].forEach(([goal,id,tid])=>{let done=t>=goal;document.getElementById(id).classList.toggle('done',done);document.getElementById(tid).textContent=done?'✓ 已完成':'預估 '+etaFn(goal)+' 完成'});
+ sTotal.textContent=fmt(t);let bm=byMonth(),best=Math.max(0,...Object.values(bm));sBest.textContent=fmt(best);count.textContent=entries.length+' 筆';
+ let sorted=[...entries].sort((a,b)=>(b.month+b.createdAt).localeCompare(a.month+a.createdAt));document.getElementById('entries').innerHTML=sorted.length?sorted.map(e=>`<div class="item"><div><strong>${e.month.replace('-','/')} · ${esc(e.type)}</strong><small>${esc(e.note||'')}</small></div><div style="text-align:right"><strong class="plus">+${fmt(e.amount)}</strong><button class="danger" onclick="delEntry('${e.id}')">刪除</button></div></div>`).join(''):'<div class="panel muted" style="text-align:center">還沒有存款紀錄</div>';
+ carPrice.value=settings.carPrice;downTarget.value=settings.downTarget;reserveTarget.value=settings.reserveTarget;baseMonthly.value=settings.baseMonthly;loanRate.value=settings.loanRate;loanYears.value=String(settings.loanYears);renderLoan();drawChart();renderSimulator()}
+function etaFn(g,s){return eta(g,s)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+async function saveSettings(){settings={...settings,carPrice:Number(carPrice.value)||1349000,downTarget:Number(downTarget.value)||400000,reserveTarget:Number(reserveTarget.value)||100000,baseMonthly:Number(baseMonthly.value)||20000,loanRate:Number(loanRate.value)||0,loanYears:Number(loanYears.value)||7};await putSettings();renderAll()}
+function renderLoan(){let principal=Math.max(0,Number(settings.carPrice)-Number(settings.downTarget));loanResult.innerHTML=`以頭期 ${fmt(settings.downTarget)} 試算：<b>貸款 ${fmt(principal)}</b><br>年利率 ${settings.loanRate}%／${settings.loanYears} 年：每月約 <b>${fmt(payment(principal))}</b><br><span class="muted">實際核貸、手續費與促銷方案仍依銀行及 Kia 當期專案。</span>`}
+function drawChart(){let c=chart,ctx=c.getContext('2d'),W=c.width,H=c.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d141c';ctx.fillRect(0,0,W,H);let bm=byMonth(),keys=Object.keys(bm).sort();ctx.strokeStyle='#273444';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=25+i*55;ctx.beginPath();ctx.moveTo(38,y);ctx.lineTo(W-15,y);ctx.stroke()}if(!keys.length){ctx.fillStyle='#95a2b3';ctx.font='14px sans-serif';ctx.fillText('加入第一筆存款後，這裡會顯示趨勢',90,120);return}let cum=0,pts=[];keys.forEach((k,i)=>{cum+=bm[k];let x=45+i*((W-75)/Math.max(keys.length-1,1)),y=H-30-Math.min(1,cum/target())*(H-55);pts.push([x,y,k,cum])});ctx.strokeStyle='#d6ff45';ctx.lineWidth=4;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.fillStyle='#f7f8fa';ctx.font='11px sans-serif';pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p[0],p[1],4,0,Math.PI*2);ctx.fill();if(i===0||i===pts.length-1||i%2===0)ctx.fillText(p[2].slice(2),p[0]-12,H-10)})}
+function renderSimulator(){let extra=Number(extraRange.value),base=average(),normal=Math.ceil(Math.max(0,target()-total())/Math.max(base,1)),faster=Math.ceil(Math.max(0,target()-total())/Math.max(base+extra,1));extraAmt.textContent=fmt(extra)+' / 月';simText.textContent=extra===0?'目前維持現有速度。':`若之後每月平均多存 ${fmt(extra)}，預估可由約 ${normal} 個月縮短為 ${faster} 個月，約提前 ${Math.max(0,normal-faster)} 個月。`}
+function go(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='stats')setTimeout(drawChart,30)}
+async function exportBackup(){let payload={version:1,exportedAt:new Date().toISOString(),settings,entries};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dream-garage-backup.json';a.click();URL.revokeObjectURL(url)}
+async function importBackup(ev){let f=ev.target.files[0];if(!f)return;try{let data=JSON.parse(await f.text());if(!data.entries||!data.settings)throw 0;let t1=tx('entries','readwrite');await reqP(t1.clear());for(const e of data.entries)await reqP(tx('entries','readwrite').put(e));settings={...settings,...data.settings};await putSettings();entries=data.entries;renderAll();alert('備份已還原');}catch{alert('備份檔格式無法讀取')}}
+async function clearData(){if(!confirm('確定清除全部存款資料？'))return;await reqP(tx('entries','readwrite').clear());entries=[];renderAll()}
+let deferredPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block'});installBtn.onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;installBtn.style.display='none'}
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+openDB().then(load);
+</script></body></html>
