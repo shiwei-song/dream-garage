@@ -1,33 +1,26 @@
-# Dream Garage PWA
+# Dream Garage v2.0
 
-這是可安裝的 PWA 版本，包含：
-- iPhone/Android 主畫面安裝
-- Service Worker 離線快取
-- IndexedDB 本機資料庫
-- 每月多筆存款、分類與備註
-- 自動完成率、預估達標月份
-- 10萬／40萬／50萬里程碑
-- 存款趨勢圖
+## v2.0 新增
+- 重新設計首頁與 5 分頁導覽
+- 本月存款摘要
+- 10萬 / 40萬 / 50萬里程碑
+- 存款累積趨勢
 - 額外存款提前購車模擬
-- Sportage 車價與車貸月付試算
-- JSON 資料匯出／還原
+- Sportage 專屬購車與貸款頁
+- 依目前存款即時計算「今天若購車」貸款月付
+- PWA 更新提示
+- JSON 備份 / 還原
+- 保留舊版資料相容性
 
-## iPhone 安裝
-PWA 必須從 HTTPS 網址開啟，不能直接用本機 file:// 檔案安裝。
-將整個資料夾部署到 GitHub Pages、Netlify、Cloudflare Pages 或其他 HTTPS 網站後：
-Safari → 分享 → 加入主畫面。
+## 資料相容性
+本版繼續使用 IndexedDB `dreamGarageDB`，store 為 `entries` 與 `settings`，因此直接覆蓋部署即可保留原本裝置資料。
 
-## 關於同步
-目前資料庫是 IndexedDB，本機離線可用。
-「匯出備份 / 還原備份」可讓你在不同裝置搬移資料。
+## 更新方式
+1. 用新版檔案覆蓋 GitHub Repository 根目錄
+2. GitHub Desktop 查看 Changes
+3. Summary 輸入 `Update Dream Garage v2.0`
+4. Commit to main
+5. Push origin
+6. GitHub Pages 自動重新部署
 
-真正的即時跨裝置雲端同步需要一個後端（例如 Supabase/Firebase）與使用者登入。
-本版資料結構已切成 settings + entries，後續可直接接雲端 sync adapter，而不需要重做 UI 與資料模型。
-
-## 初始設定
-- 開始月份：2026-09
-- Sportage 車價：NT$1,349,000
-- 頭期目標：NT$400,000
-- 安全預備金：NT$100,000
-- 每月最低存款：NT$20,000
-- 貸款試算：年利率 2.8%、7 年（可自行修改）
+真正跨裝置即時雲端同步建議放在 v2.1，需另外接 Supabase/Firebase 與登入機制。
