@@ -36,10 +36,25 @@ canvas{display:block;width:100%;height:230px;background:#0d141c;border-radius:14
 .loan-table{width:100%;border-collapse:collapse;font-size:12px}.loan-table th,.loan-table td{padding:10px 5px;border-bottom:1px solid var(--line);text-align:right}.loan-table th:first-child,.loan-table td:first-child{text-align:left}.best{color:var(--accent);font-weight:900}
 .update-banner{display:none;background:#172113;border:1px solid #384c24;border-radius:15px;padding:12px;margin-bottom:12px}.update-banner .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(610px,100%);display:grid;grid-template-columns:repeat(6,1fr);background:rgba(8,12,17,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:7px 5px calc(7px + env(safe-area-inset-bottom));z-index:40}.tab{background:transparent;color:var(--muted);font-size:9px;padding:7px 1px}.tab b{display:block;font-size:18px;margin-bottom:2px}.tab.active{color:var(--accent)}.page{display:none}.page.active{display:block}
+
+.sync-pill{padding:7px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:900;background:var(--panel2);color:var(--muted)}
+.sync-pill.synced{color:var(--good);border-color:rgba(143,226,142,.35);background:rgba(143,226,142,.08)}
+.sync-pill.syncing{color:var(--warn);border-color:rgba(255,200,90,.35)}
+.sync-pill.error{color:var(--bad);border-color:rgba(255,116,116,.35)}
+.cloud-card{background:radial-gradient(circle at 90% -20%,rgba(142,184,255,.18),transparent 36%),var(--panel)}
+.cloud-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.cloud-title{font-size:18px;font-weight:900}.cloud-email{font-size:12px;color:var(--muted);margin-top:4px}
+.cloud-status{font-size:12px;padding:7px 9px;border-radius:999px;background:#0d141c;border:1px solid var(--line)}
+.cloud-login{display:grid;gap:9px;margin-top:14px}.cloud-login .actions{margin-top:2px}
+.cloud-message{margin-top:10px;font-size:12px;line-height:1.6;color:var(--muted)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-backdrop.show{display:flex}.modal{width:min(610px,100%);background:#101821;border:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.modal h2{margin:0 0 7px}.modal p{color:var(--muted);font-size:13px;line-height:1.65}.choice{display:grid;gap:9px;margin-top:15px}.choice button{text-align:left;padding:14px}
+.cloud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cloud-metric{background:#0d141c;border:1px solid var(--line);border-radius:14px;padding:12px}.cloud-metric small{display:block;color:var(--muted);margin-bottom:4px}
+
 </style>
 </head>
 <body><div class="app">
-<header><div class="brand"><small>DREAM GARAGE</small><h1>Sportage 計畫</h1></div><div class="ver">v2.1.0</div></header>
+<header><div class="brand"><small>DREAM GARAGE</small><h1>Sportage 計畫</h1></div><div style="display:flex;gap:7px;align-items:center"><button id="syncPill" class="sync-pill local" onclick="openCloudPanel()">○ 本機模式</button><div class="ver">v2.2.0</div></div></header>
 <div class="update-banner" id="updateBanner"><div class="row"><div><strong>有新版可用</strong><div class="note">會先建立安全快照，再更新 App。</div></div><button class="secondary" onclick="applyUpdate()">安全更新</button></div></div>
 
 <section id="home" class="page active">
@@ -106,6 +121,21 @@ canvas{display:block;width:100%;height:230px;background:#0d141c;border-radius:14
 </section>
 
 <section id="settings" class="page">
+
+<div class="section" id="cloudPanel"><div class="title"><h2>☁️ 雲端帳號</h2><span>Supabase Sync</span></div><div class="card cloud-card">
+ <div class="cloud-head"><div><div class="cloud-title" id="cloudTitle">尚未登入</div><div class="cloud-email" id="cloudEmail">登入後 Safari、主畫面 App、Mac 共用同一份資料</div></div><div class="cloud-status" id="cloudStatus">本機模式</div></div>
+ <div id="cloudLogin" class="cloud-login">
+   <input type="email" id="authEmail" autocomplete="email" placeholder="Email">
+   <input type="password" id="authPassword" autocomplete="current-password" placeholder="密碼（至少 6 碼）">
+   <div class="actions"><button class="primary" onclick="cloudSignIn()">登入</button><button class="secondary" onclick="cloudSignUp()">建立帳號</button></div>
+ </div>
+ <div id="cloudAccount" style="display:none">
+   <div class="cloud-grid"><div class="cloud-metric"><small>雲端紀錄</small><strong id="cloudEntryCount">—</strong></div><div class="cloud-metric"><small>最後同步</small><strong id="cloudLastSync">—</strong></div></div>
+   <div class="actions" style="margin-top:10px"><button class="secondary" onclick="syncNow(true)">立即同步</button><button class="secondary" onclick="cloudSignOut()">登出</button></div>
+ </div>
+ <div class="cloud-message" id="cloudMessage">目前仍保留 IndexedDB、JSON、快照作為本機備援。雲端登入成功後才會啟用跨裝置同步。</div>
+</div></div>
+
 <div class="section"><div class="title"><h2>計畫設定</h2><span>不會重建資料庫</span></div><div class="card">
  <div class="fields"><div class="field"><label>開始月份</label><input type="month" id="startMonth"></div><div class="field"><label>每月最低存款</label><input type="number" id="baseMonthly"></div></div>
  <div class="fields"><div class="field"><label>車價</label><input type="number" id="carPrice"></div><div class="field"><label>頭期款</label><input type="number" id="downTarget"></div></div>
@@ -119,8 +149,17 @@ canvas{display:block;width:100%;height:230px;background:#0d141c;border-radius:14
  <input id="restoreFile" type="file" accept="application/json" hidden onchange="importJSON(event)">
  <p class="note">CSV 適合用 Excel/Numbers 看紀錄；JSON 才是完整還原用備份。</p>
 </div></div>
-<div class="section"><div class="title"><h2>診斷資訊</h2><span>v2.1.0</span></div><div class="card"><div class="summary-box" id="diagnostics"></div></div></div>
+<div class="section"><div class="title"><h2>診斷資訊</h2><span>v2.2.0</span></div><div class="card"><div class="summary-box" id="diagnostics"></div></div></div>
 </section>
+</div>
+
+<div class="modal-backdrop" id="migrationModal">
+ <div class="modal">
+  <h2 id="migrationTitle">第一次雲端同步</h2>
+  <p id="migrationText"></p>
+  <div class="choice" id="migrationChoices"></div>
+  <button class="danger" style="width:100%;margin-top:10px" onclick="closeMigration()">稍後處理</button>
+ </div>
 </div>
 
 <nav class="tabs">
@@ -132,9 +171,12 @@ canvas{display:block;width:100%;height:230px;background:#0d141c;border-radius:14
 <button class="tab" onclick="go('settings',this)"><b>⚙️</b>更多</button>
 </nav>
 
+<script src="./supabase-config.js"></script>
 <script>
-const APP_VERSION='2.1.0',DB='dreamGarageDB',DB_VERSION=3,MIRROR='dreamGarage_mirror_v2_1_0';
-let db,waitingWorker=null,entries=[],snapshots=[];
+const APP_VERSION='2.2.0',DB='dreamGarageDB',DB_VERSION=3,MIRROR='dreamGarage_mirror_v2_1_0';
+const CLOUD_QUEUE_KEY='dreamGarage_cloud_queue_v1',CLOUD_SESSION_KEY='dreamGarage_cloud_session_v1',CLOUD_MIGRATION_KEY='dreamGarage_cloud_migrated_v1';
+const CLOUD=window.DREAM_GARAGE_CLOUD||{},SUPABASE_URL=(CLOUD.url||'').replace(/\/$/,''),SUPABASE_KEY=CLOUD.publishableKey||'';
+let db,waitingWorker=null,entries=[],snapshots=[],cloudSession=null,cloudUser=null,cloudBusy=false,lastCloudSync=null;
 let settings={startMonth:'2026-09',carPrice:1349000,downTarget:400000,reserveTarget:100000,baseMonthly:20000,loanRate:2.8,loanYears:7};
 let budget={salary:60000,family:10000,card:12500,saving:20000};
 
@@ -157,15 +199,16 @@ async function load(){
   let b=await rp(st('budget').get('main'));if(b?.value)budget={...budget,...b.value};
   entries=await rp(st('entries').getAll());snapshots=await rp(st('snapshots').getAll());snapshots.sort((a,b)=>b.id-a.id);
   if(!entries.length){try{let m=JSON.parse(localStorage.getItem(MIRROR)||'null');if(m?.entries?.length)await restorePayload(m,false)}catch{}}
-  entryMonth.value=settings.startMonth;renderAll();
+  entryMonth.value=settings.startMonth;renderAll();restoreSession();renderCloud();
+  if(cloudSession) setTimeout(()=>syncNow(false),300);
  }catch(e){healthDb.textContent='異常';healthDb.className='bad';diagnostics.textContent=e.message}
 }
 async function restorePayload(p,makeBackup=true){if(!p?.settings||!Array.isArray(p.entries))throw Error('invalid');if(makeBackup)await safeguard('before-restore');await rp(st('entries','readwrite').clear());for(const e of p.entries)await rp(st('entries','readwrite').put(e));entries=p.entries;settings={...settings,...p.settings};budget={...budget,...p.budget};await rp(st('settings','readwrite').put({key:'main',value:settings}));await rp(st('budget','readwrite').put({key:'main',value:budget}));await safeguard('restore');renderAll()}
-async function addEntry(){let amount=Number(entryAmount.value),month=entryMonth.value;if(!month||amount<=0)return alert('請輸入月份與金額');let e={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),month,amount,type:entryType.value,note:entryNote.value.trim(),createdAt:Date.now()};await rp(st('entries','readwrite').put(e));entries.push(e);await safeguard('add-entry');entryAmount.value='';entryNote.value='';renderAll()}
-async function delEntry(id){if(!confirm('刪除這筆紀錄？'))return;await safeguard('before-delete');await rp(st('entries','readwrite').delete(id));entries=entries.filter(e=>e.id!==id);await safeguard('delete-entry');renderAll()}
+async function addEntry(){let amount=Number(entryAmount.value),month=entryMonth.value;if(!month||amount<=0)return alert('請輸入月份與金額');let e={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),month,amount,type:entryType.value,note:entryNote.value.trim(),createdAt:Date.now()};await rp(st('entries','readwrite').put(e));entries.push(e);await safeguard('add-entry');queueCloud({kind:'entry_upsert',entry:e});entryAmount.value='';entryNote.value='';renderAll();flushQueue()}
+async function delEntry(id){if(!confirm('刪除這筆紀錄？'))return;await safeguard('before-delete');await rp(st('entries','readwrite').delete(id));entries=entries.filter(e=>e.id!==id);await safeguard('delete-entry');queueCloud({kind:'entry_delete',id});renderAll();flushQueue()}
 function preset(t,a){entryType.value=t;entryAmount.value=a||'';entryAmount.focus()}
-async function saveSettings(){settings={...settings,startMonth:startMonth.value||'2026-09',baseMonthly:+baseMonthly.value||20000,carPrice:+carPrice.value||1349000,downTarget:+downTarget.value||400000,reserveTarget:+reserveTarget.value||100000,loanRate:+loanRate.value||0,loanYears:+loanYears.value||7};await rp(st('settings','readwrite').put({key:'main',value:settings}));await safeguard('settings');renderAll();alert('設定已儲存')}
-async function saveBudget(){budget={salary:+salary.value||0,family:+family.value||0,card:+cardBudget.value||0,saving:+budgetSaving.value||0};await rp(st('budget','readwrite').put({key:'main',value:budget}));await safeguard('budget');renderBudget();alert('月度預算已儲存')}
+async function saveSettings(){settings={...settings,startMonth:startMonth.value||'2026-09',baseMonthly:+baseMonthly.value||20000,carPrice:+carPrice.value||1349000,downTarget:+downTarget.value||400000,reserveTarget:+reserveTarget.value||100000,loanRate:+loanRate.value||0,loanYears:+loanYears.value||7};await rp(st('settings','readwrite').put({key:'main',value:settings}));await safeguard('settings');queueCloud({kind:'settings'});renderAll();flushQueue();alert('設定已儲存')}
+async function saveBudget(){budget={salary:+salary.value||0,family:+family.value||0,card:+cardBudget.value||0,saving:+budgetSaving.value||0};await rp(st('budget','readwrite').put({key:'main',value:budget}));await safeguard('budget');queueCloud({kind:'settings'});renderBudget();flushQueue();alert('月度預算已儲存')}
 
 function renderAll(){
  let t=total(),g=goal(),p=Math.min(100,t/g*100||0),a=average(),left=Math.max(0,Math.ceil((g-t)/Math.max(a,1))),bm=byMonth(),keys=Object.keys(bm).sort(),cur=keys.length?keys[keys.length-1]:settings.startMonth,curAmt=bm[cur]||0;
@@ -176,21 +219,54 @@ function renderAll(){
  carPriceShow.textContent=fmt(settings.carPrice);let planned=Math.max(0,settings.carPrice-settings.downTarget);carPlan.innerHTML=`頭期 <b>${fmt(settings.downTarget)}</b>＋預備金 <b>${fmt(settings.reserveTarget)}</b><br>${settings.loanYears} 年／${settings.loanRate}%：理想頭期完成後月付約 <b>${fmt(payment(planned))}</b>。`;
  startMonth.value=settings.startMonth;baseMonthly.value=settings.baseMonthly;carPrice.value=settings.carPrice;downTarget.value=settings.downTarget;reserveTarget.value=settings.reserveTarget;loanRate.value=settings.loanRate;loanYears.value=String(settings.loanYears);
  salary.value=budget.salary;family.value=budget.family;cardBudget.value=budget.card;budgetSaving.value=budget.saving;
- renderEntries();renderBudget();drawChart();renderSimulator();renderLoanTable();renderHealth();
+ renderEntries();renderBudget();drawChart();renderSimulator();renderLoanTable();renderHealth();renderCloud();
 }
 function renderEntries(){let q=(searchText.value||'').toLowerCase(),typ=searchType.value;let arr=[...entries].filter(e=>(!typ||e.type===typ)&&(!q||(e.note||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q)||e.month.includes(q))).sort((a,b)=>(b.month+String(b.createdAt)).localeCompare(a.month+String(a.createdAt)));count.textContent=arr.length+' 筆';document.getElementById('entries').innerHTML=arr.length?arr.map(e=>`<div class="item"><div><strong>${e.month.replace('-','/')} · ${esc(e.type)}</strong><small>${esc(e.note)}</small></div><div style="text-align:right"><strong class="plus">+${fmt(e.amount)}</strong><button class="danger" onclick="delEntry('${e.id}')">刪除</button></div></div>`).join(''):'<div class="card" style="text-align:center;color:var(--muted)">沒有符合的紀錄</div>'}
 function renderBudget(){let used=budget.family+budget.card+budget.saving,free=budget.salary-used;let rows=[['孝親費',budget.family],['信用卡預算',budget.card],['購車基金',budget.saving],['剩餘彈性',free]];budgetView.innerHTML=rows.map(([n,v])=>`<div class="budget-row"><div class="budget-head"><span>${n}</span><strong>${fmt(v)}</strong></div><div class="progress-mini"><i style="width:${Math.max(0,Math.min(100,v/Math.max(budget.salary,1)*100))}%"></i></div></div>`).join('')+`<div class="summary-box">固定配置後每月約剩 <span class="em">${fmt(free)}</span>。月底如果實際沒有用完，可以再轉入購車基金。</div>`}
 function drawChart(){let c=chart,ctx=c.getContext('2d'),W=c.width,H=c.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d141c';ctx.fillRect(0,0,W,H);let bm=byMonth(),keys=Object.keys(bm).sort();if(!keys.length){ctx.fillStyle='#96a4b6';ctx.font='14px sans-serif';ctx.fillText('新增存款後顯示趨勢',120,125);return}ctx.strokeStyle='#293746';for(let i=0;i<4;i++){let y=28+i*58;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(W-18,y);ctx.stroke()}let cum=0,pts=[];keys.forEach((k,i)=>{cum+=bm[k];let x=50+i*((W-95)/Math.max(1,keys.length-1)),y=H-35-Math.min(1,cum/goal())*(H-70);pts.push([x,y,k])});ctx.strokeStyle='#d9ff48';ctx.lineWidth=4;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.fillStyle='#fff';ctx.font='11px sans-serif';pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p[0],p[1],4,0,Math.PI*2);ctx.fill();if(i===0||i===pts.length-1||i%2===0)ctx.fillText(p[2].slice(2),p[0]-12,H-12)})}
 function renderSimulator(){let extra=+extraRange.value,base=average(),normal=Math.ceil(Math.max(0,goal()-total())/Math.max(base,1)),fast=Math.ceil(Math.max(0,goal()-total())/Math.max(base+extra,1));extraAmt.textContent=fmt(extra)+' / 月';simText.innerHTML=extra?`每月多存 <span class="em">${fmt(extra)}</span>，預估可由 ${normal} 個月縮短為 <b>${fast}</b> 個月，約提前 <span class="em">${Math.max(0,normal-fast)} 個月</span>。`:'維持目前速度。'}
 function renderLoanTable(){let heads=[200000,300000,400000,500000];loanTable.innerHTML='<tr><th>頭期</th><th>貸款</th><th>月付</th></tr>'+heads.map(h=>{let p=Math.max(0,settings.carPrice-h);return`<tr class="${h===settings.downTarget?'best':''}"><td>${fmt(h)}</td><td>${fmt(p)}</td><td>${fmt(payment(p))}</td></tr>`}).join('')}
-function renderHealth(){healthDb.textContent='正常';healthMirror.textContent=localStorage.getItem(MIRROR)?'正常':'待建立';healthSnap.textContent=snapshots.length+' 份';lastBackup.textContent=snapshots[0]?new Date(snapshots[0].id).toLocaleString('zh-TW'):'尚未';snapshotsEl=document.getElementById('snapshots');if(snapshotsEl)snapshotsEl.innerHTML=snapshots.length?snapshots.map(s=>`<div class="item"><div><strong>${new Date(s.id).toLocaleString('zh-TW')}</strong><small>${esc(s.reason)} · ${s.payload.entries.length} 筆紀錄</small></div><button class="secondary" onclick="restoreSnapshot(${s.id})">還原</button></div>`).join(''):'<div class="card" style="text-align:center;color:var(--muted)">尚無快照</div>';diagnostics.innerHTML=`App：<b>${APP_VERSION}</b><br>IndexedDB：<b>${DB}</b> v${DB_VERSION}<br>紀錄：<b>${entries.length}</b> 筆<br>快照：<b>${snapshots.length}</b> 份<br>鏡像：<b>${localStorage.getItem(MIRROR)?'存在':'尚未建立'}</b>`}
+function renderHealth(){healthDb.textContent='正常';healthMirror.textContent=localStorage.getItem(MIRROR)?'正常':'待建立';healthSnap.textContent=snapshots.length+' 份';lastBackup.textContent=snapshots[0]?new Date(snapshots[0].id).toLocaleString('zh-TW'):'尚未';let snapshotsEl=document.getElementById('snapshots');if(snapshotsEl)snapshotsEl.innerHTML=snapshots.length?snapshots.map(s=>`<div class="item"><div><strong>${new Date(s.id).toLocaleString('zh-TW')}</strong><small>${esc(s.reason)} · ${s.payload.entries.length} 筆紀錄</small></div><button class="secondary" onclick="restoreSnapshot(${s.id})">還原</button></div>`).join(''):'<div class="card" style="text-align:center;color:var(--muted)">尚無快照</div>';diagnostics.innerHTML=`App：<b>${APP_VERSION}</b><br>IndexedDB：<b>${DB}</b> v${DB_VERSION}<br>紀錄：<b>${entries.length}</b> 筆<br>快照：<b>${snapshots.length}</b> 份<br>鏡像：<b>${localStorage.getItem(MIRROR)?'存在':'尚未建立'}</b><br>雲端：<b>${cloudSession?'已登入':'未登入'}</b>`}
 async function manualSnapshot(){await safeguard('manual');alert('快照已建立')}
-async function restoreSnapshot(id){let s=snapshots.find(x=>x.id===id);if(!s)return;if(!confirm('要還原這份快照嗎？目前資料會先備份。'))return;await restorePayload(s.payload,true);alert('已還原')}
+async function restoreSnapshot(id){let s=snapshots.find(x=>x.id===id);if(!s)return;if(!confirm('要還原這份快照嗎？目前資料會先備份。'))return;await restorePayload(s.payload,true);queueCloud({kind:'full_push'});flushQueue();alert('已還原')}
 async function exportJSON(){await safeguard('before-export');let blob=new Blob([JSON.stringify(dataPayload(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DreamGarage_Backup_'+new Date().toISOString().slice(0,10)+'.json';a.click()}
 function exportCSV(){let rows=[['月份','分類','金額','備註'],...entries.map(e=>[e.month,e.type,e.amount,e.note||''])];let csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='DreamGarage_Records_'+new Date().toISOString().slice(0,10)+'.csv';a.click()}
-async function importJSON(e){let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());await restorePayload(d,true);alert('已還原備份')}catch{alert('備份格式無法讀取')}}
+async function importJSON(e){let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());await restorePayload(d,true);queueCloud({kind:'full_push'});flushQueue();alert('已還原備份')}catch{alert('備份格式無法讀取')}}
 async function applyUpdate(){await safeguard('before-app-update');if(waitingWorker)waitingWorker.postMessage({type:'SKIP_WAITING'});else location.reload()}
 function go(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='stats')setTimeout(drawChart,40)}
+function openCloudPanel(){go('settings',document.querySelectorAll('.tab')[5]);setTimeout(()=>document.getElementById('cloudPanel').scrollIntoView({behavior:'smooth'}),50)}
+
+/* ---------- Cloud auth + sync ---------- */
+const cloudReady=()=>SUPABASE_URL&&SUPABASE_KEY&&!SUPABASE_KEY.includes('PASTE_');
+function authHeaders(token){return{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'}}
+function saveSession(s){cloudSession=s;cloudUser=s?.user||null;if(s)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(s));else localStorage.removeItem(CLOUD_SESSION_KEY);renderCloud()}
+function restoreSession(){try{let s=JSON.parse(localStorage.getItem(CLOUD_SESSION_KEY)||'null');if(s)saveSession(s)}catch{}}
+async function cloudFetch(path,opts={}){if(!cloudReady())throw Error('尚未設定 Supabase Publishable key');if(!cloudSession?.access_token)throw Error('尚未登入');let r=await fetch(SUPABASE_URL+path,{...opts,headers:{...authHeaders(cloudSession.access_token),...(opts.headers||{})}});if(r.status===401&&cloudSession.refresh_token){let ok=await refreshSession();if(ok)return cloudFetch(path,opts)}if(!r.ok){let t=await r.text();throw Error(t||('HTTP '+r.status))}let txt=await r.text();return txt?JSON.parse(txt):null}
+async function refreshSession(){try{let r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:cloudSession.refresh_token})});if(!r.ok)throw Error();saveSession(await r.json());return true}catch{saveSession(null);return false}}
+async function cloudSignUp(){if(!cloudReady())return alert('請先在 supabase-config.js 填入 Publishable key');let email=authEmail.value.trim(),password=authPassword.value;if(!email||password.length<6)return alert('請輸入 Email，密碼至少 6 碼');setCloudState('syncing','建立帳號…');try{let r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password,options:{emailRedirectTo:'https://shiwei-song.github.io/dream-garage/'}})});let d=await r.json();if(!r.ok)throw Error(d.msg||d.message||'註冊失敗');if(d.session)saveSession(d.session);alert('帳號已建立。若信箱收到驗證信，請先完成 Email 驗證，再回來登入。');renderCloud()}catch(e){setCloudState('error','註冊失敗');alert(e.message)}}
+async function cloudSignIn(){if(!cloudReady())return alert('請先在 supabase-config.js 填入 Publishable key');let email=authEmail.value.trim(),password=authPassword.value;if(!email||!password)return alert('請輸入 Email 與密碼');setCloudState('syncing','登入中…');try{let r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});let d=await r.json();if(!r.ok)throw Error(d.error_description||d.msg||d.message||'登入失敗');saveSession(d);authPassword.value='';await syncNow(false,true)}catch(e){setCloudState('error','登入失敗');alert(e.message)}}
+async function cloudSignOut(){if(cloudSession?.access_token){try{await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:authHeaders(cloudSession.access_token)})}catch{}}saveSession(null);localStorage.removeItem(CLOUD_MIGRATION_KEY);renderCloud()}
+function setCloudState(type,text){let pill=document.getElementById('syncPill'),stat=document.getElementById('cloudStatus');if(pill){pill.className='sync-pill '+type;pill.textContent=type==='synced'?'● 已同步':type==='syncing'?'↻ 同步中':type==='error'?'! 同步異常':'○ 本機模式'}if(stat)stat.textContent=text||pill?.textContent||''}
+function renderCloud(){let configured=cloudReady(),logged=!!cloudSession;cloudLogin.style.display=logged?'none':'grid';cloudAccount.style.display=logged?'block':'none';cloudTitle.textContent=logged?'Dream Garage Cloud':'尚未登入';cloudEmail.textContent=logged?(cloudUser?.email||'已登入'):(configured?'登入後跨裝置同步':'尚未填入 Publishable key');cloudEntryCount.textContent=logged?entries.length+' 筆':'—';cloudLastSync.textContent=lastCloudSync?lastCloudSync.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}):'—';if(!configured){setCloudState('error','待設定 Key');cloudMessage.textContent='請先完成 supabase-config.js 的 Publishable key。';return}if(!logged){setCloudState('local','本機模式');cloudMessage.textContent='目前資料仍安全存在本機。登入後才開始雲端同步。';return}setCloudState(cloudBusy?'syncing':'synced',cloudBusy?'同步中':'已登入');cloudMessage.textContent='雲端是跨裝置共同資料源；IndexedDB、鏡像與快照仍保留作為離線與安全備援。'}
+function queueCloud(op){if(!cloudSession)return;let q=[];try{q=JSON.parse(localStorage.getItem(CLOUD_QUEUE_KEY)||'[]')}catch{}q.push({...op,queuedAt:Date.now()});localStorage.setItem(CLOUD_QUEUE_KEY,JSON.stringify(q));setCloudState('syncing','等待同步')}
+async function flushQueue(){if(!cloudSession||cloudBusy||!navigator.onLine)return;let q=[];try{q=JSON.parse(localStorage.getItem(CLOUD_QUEUE_KEY)||'[]')}catch{}if(!q.length)return;cloudBusy=true;renderCloud();try{for(const op of q){if(op.kind==='entry_upsert')await upsertCloudEntries([op.entry]);else if(op.kind==='entry_delete')await cloudFetch('/rest/v1/dream_garage_entries?id=eq.'+encodeURIComponent(op.id),{method:'DELETE'});else if(op.kind==='settings')await pushCloudSettings();else if(op.kind==='full_push')await pushAllCloud()}localStorage.removeItem(CLOUD_QUEUE_KEY);lastCloudSync=new Date();setCloudState('synced','已同步')}catch(e){console.error(e);setCloudState('error','等待重試')}finally{cloudBusy=false;renderCloud()}}
+function localEntryToCloud(e){return{id:e.id,user_id:cloudUser.id,month:e.month,amount:Number(e.amount),type:e.type,note:e.note||'',created_at:new Date(e.createdAt||Date.now()).toISOString(),updated_at:new Date().toISOString()}}
+function cloudEntryToLocal(e){return{id:e.id,month:e.month,amount:Number(e.amount),type:e.type,note:e.note||'',createdAt:new Date(e.created_at||Date.now()).getTime()}}
+async function upsertCloudEntries(list){if(!list.length)return;await cloudFetch('/rest/v1/dream_garage_entries?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(list.map(localEntryToCloud))})}
+async function pushCloudSettings(){let row={user_id:cloudUser.id,start_month:settings.startMonth,car_price:Number(settings.carPrice),down_target:Number(settings.downTarget),reserve_target:Number(settings.reserveTarget),base_monthly:Number(settings.baseMonthly),loan_rate:Number(settings.loanRate),loan_years:Number(settings.loanYears),salary:Number(budget.salary),family_budget:Number(budget.family),card_budget:Number(budget.card),updated_at:new Date().toISOString()};await cloudFetch('/rest/v1/dream_garage_settings?on_conflict=user_id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)})}
+async function pushAllCloud(){await upsertCloudEntries(entries);await pushCloudSettings()}
+async function fetchCloudData(){let ce=await cloudFetch('/rest/v1/dream_garage_entries?select=*&order=created_at.asc'),cs=await cloudFetch('/rest/v1/dream_garage_settings?select=*&limit=1');return{entries:(ce||[]).map(cloudEntryToLocal),settings:cs?.[0]||null}}
+async function applyCloudLocally(c){await safeguard('before-cloud-pull');await rp(st('entries','readwrite').clear());for(const e of c.entries)await rp(st('entries','readwrite').put(e));entries=c.entries;if(c.settings){settings={...settings,startMonth:c.settings.start_month||settings.startMonth,carPrice:Number(c.settings.car_price??settings.carPrice),downTarget:Number(c.settings.down_target??settings.downTarget),reserveTarget:Number(c.settings.reserve_target??settings.reserveTarget),baseMonthly:Number(c.settings.base_monthly??settings.baseMonthly),loanRate:Number(c.settings.loan_rate??settings.loanRate),loanYears:Number(c.settings.loan_years??settings.loanYears)};budget={...budget,salary:Number(c.settings.salary??budget.salary),family:Number(c.settings.family_budget??budget.family),card:Number(c.settings.card_budget??budget.card),saving:Number(c.settings.base_monthly??budget.saving)};await rp(st('settings','readwrite').put({key:'main',value:settings}));await rp(st('budget','readwrite').put({key:'main',value:budget}))}await safeguard('cloud-pull');renderAll()}
+async function syncNow(manual=false,forceMigration=false){if(!cloudSession)return manual&&alert('請先登入');if(cloudBusy)return;cloudBusy=true;renderCloud();try{await flushQueue();let c=await fetchCloudData(),migrated=localStorage.getItem(CLOUD_MIGRATION_KEY)==='1';if(!migrated||forceMigration){await decideMigration(c);return}await applyCloudLocally(c);lastCloudSync=new Date();setCloudState('synced','已同步');if(manual)alert('同步完成')}catch(e){console.error(e);setCloudState('error','同步失敗');if(manual)alert('同步失敗：'+e.message)}finally{cloudBusy=false;renderCloud()}}
+function decideMigration(c){let localCount=entries.length,cloudCount=c.entries.length;cloudBusy=false;renderCloud();if(localCount===0&&cloudCount===0){localStorage.setItem(CLOUD_MIGRATION_KEY,'1');pushCloudSettings().then(()=>{lastCloudSync=new Date();renderCloud()});return}if(cloudCount===0&&localCount>0){showMigration('雲端目前是空的',`這台裝置有 ${localCount} 筆本機紀錄，共 ${fmt(total())}。建議把本機資料上傳成第一份雲端資料。`,[{label:'上傳本機資料到雲端',cls:'primary',fn:async()=>{await pushAllCloud();localStorage.setItem(CLOUD_MIGRATION_KEY,'1');closeMigration();lastCloudSync=new Date();renderCloud()}},{label:'保持雲端空白（不建議）',cls:'secondary',fn:()=>{localStorage.setItem(CLOUD_MIGRATION_KEY,'1');closeMigration()}}]);return}
+ if(cloudCount>0&&localCount===0){showMigration('找到雲端資料',`雲端有 ${cloudCount} 筆紀錄。這台裝置目前沒有本機紀錄。`,[{label:'下載雲端資料到這台裝置',cls:'primary',fn:async()=>{await applyCloudLocally(c);localStorage.setItem(CLOUD_MIGRATION_KEY,'1');closeMigration();lastCloudSync=new Date()}}]);return}
+ showMigration('本機與雲端都有資料',`本機 ${localCount} 筆；雲端 ${cloudCount} 筆。為避免重複或覆蓋，請選擇第一次同步方式。`,[{label:'使用雲端資料（建議第二台裝置）',cls:'primary',fn:async()=>{await applyCloudLocally(c);localStorage.setItem(CLOUD_MIGRATION_KEY,'1');closeMigration();lastCloudSync=new Date()}},{label:'合併後上傳（依紀錄 ID 去重）',cls:'secondary',fn:async()=>{let map=new Map(c.entries.map(e=>[e.id,e]));entries.forEach(e=>map.set(e.id,e));entries=[...map.values()];await rp(st('entries','readwrite').clear());for(const e of entries)await rp(st('entries','readwrite').put(e));await pushAllCloud();await safeguard('cloud-merge');localStorage.setItem(CLOUD_MIGRATION_KEY,'1');closeMigration();lastCloudSync=new Date();renderAll()}}])}
+function showMigration(title,text,choices){migrationTitle.textContent=title;migrationText.textContent=text;migrationChoices.innerHTML='';choices.forEach(c=>{let b=document.createElement('button');b.className=c.cls||'secondary';b.textContent=c.label;b.onclick=async()=>{try{b.disabled=true;await c.fn()}catch(e){b.disabled=false;alert('處理失敗：'+e.message)}};migrationChoices.appendChild(b)});migrationModal.classList.add('show')}
+function closeMigration(){migrationModal.classList.remove('show')}
+
+window.addEventListener('online',()=>{flushQueue();if(cloudSession)syncNow(false)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&cloudSession)syncNow(false)});
+window.addEventListener('focus',()=>{if(cloudSession)syncNow(false)});
 
 if('serviceWorker'in navigator){window.addEventListener('load',async()=>{const reg=await navigator.serviceWorker.register('./sw.js');if(reg.waiting){waitingWorker=reg.waiting;updateBanner.style.display='block'}reg.addEventListener('updatefound',()=>{let nw=reg.installing;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller){waitingWorker=nw;updateBanner.style.display='block'}})})});navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload())}
 openDB().then(load);

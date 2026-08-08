@@ -1,28 +1,37 @@
-# Dream Garage v2.1.0
+# Dream Garage v2.2.0 Cloud Sync
 
-新增功能版，建立於資料安全架構之上。
+## 這版新增
+- Supabase Email 註冊 / 登入 / 登出
+- Safari、iPhone 主畫面 PWA、Mac 共用同一份雲端資料
+- 首次登入資料遷移保護：不會讓空雲端直接覆蓋本機資料
+- 本機資料上傳 / 雲端資料下載 / ID 去重合併
+- 離線仍先寫 IndexedDB，恢復網路後重試同步
+- App 回到前景、重新取得焦點、恢復網路時自動拉取雲端
+- IndexedDB、鏡像、快照、JSON/CSV 備份全部保留
+- Header 顯示同步狀態
 
-## v2.1.0 新增
-- 月度資金配置：月薪、孝親費、信用卡預算、最低存車基金
-- 本月存款摘要
-- 紀錄搜尋與分類篩選
-- CSV 匯出（Excel / Numbers 可開啟）
-- JSON 完整備份與還原
-- Sportage 頭期 20 / 30 / 40 / 50 萬貸款比較
-- 額外月存款 → 提前購車月份模擬
-- IndexedDB 時間機器快照
-- 每次資料異動自動鏡像與快照
-- 更新前安全快照
-- 診斷資訊
+## 上線前唯一要設定的地方
+打開 `supabase-config.js`：
 
-## 資料庫
-沿用 `dreamGarageDB`，升至 DB v3。
-原有 entries / settings / snapshots / meta 均保留，只新增 budget store。
+```js
+window.DREAM_GARAGE_CLOUD = {
+  url: "https://qxgmhepvqktuaametndp.supabase.co",
+  publishableKey: "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE"
+};
+```
 
-## 更新方式
-覆蓋 Repository 根目錄後：
-1. GitHub Desktop：確認變更
-2. Summary：`Update Dream Garage v2.1.0`
-3. Commit to main
-4. Push origin
-5. GitHub Pages 自動部署
+把 `PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE` 換成 Supabase Settings → API Keys 的 `sb_publishable_...`。
+
+不要使用 `sb_secret_...`、service_role 或 Database password。
+
+## 更新 GitHub
+1. 先在目前 v2.1.0 的主畫面 App 匯出一份 JSON。
+2. 將本資料夾所有檔案覆蓋到 GitHub repository `dream-garage` 根目錄。
+3. GitHub Desktop Summary：`Update Dream Garage v2.2.0 Cloud Sync`
+4. Commit to main
+5. Push origin
+6. 等 GitHub Pages 部署完成。
+
+## 第一次登入
+第一台有正式資料的裝置：選「上傳本機資料到雲端」。
+第二台裝置：登入同帳號後選「使用雲端資料」。
