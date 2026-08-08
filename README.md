@@ -1,37 +1,27 @@
-# Dream Garage v2.2.0 Cloud Sync
+# Dream Garage v2.2.1 — Delete Sync Fix
 
-## 這版新增
-- Supabase Email 註冊 / 登入 / 登出
-- Safari、iPhone 主畫面 PWA、Mac 共用同一份雲端資料
-- 首次登入資料遷移保護：不會讓空雲端直接覆蓋本機資料
-- 本機資料上傳 / 雲端資料下載 / ID 去重合併
-- 離線仍先寫 IndexedDB，恢復網路後重試同步
-- App 回到前景、重新取得焦點、恢復網路時自動拉取雲端
-- IndexedDB、鏡像、快照、JSON/CSV 備份全部保留
-- Header 顯示同步狀態
+這版專門修正 v2.2.0 的刪除同步問題。
 
-## 上線前唯一要設定的地方
-打開 `supabase-config.js`：
+## 修正
+- 刪除後立即從畫面移除，不再等雲端 round-trip。
+- 刪除本機 IndexedDB 後，先送出 Supabase DELETE。
+- DELETE 完成後才重新拉取雲端資料確認。
+- 修正 `syncNow()` / `flushQueue()` 的同步競態：手動立即同步會先處理待送佇列，再下載雲端資料。
+- 若刪除失敗，會恢復原紀錄並顯示錯誤。
 
-```js
-window.DREAM_GARAGE_CLOUD = {
-  url: "https://qxgmhepvqktuaametndp.supabase.co",
-  publishableKey: "PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE"
-};
-```
+## 更新
+1. 解壓縮。
+2. 打開 `supabase-config.js`，把 placeholder 換回你自己的 `sb_publishable_...`。
+3. 覆蓋 GitHub repository `dream-garage` 根目錄。
+4. GitHub Desktop Summary：`Fix delete sync v2.2.1`
+5. Commit to main。
+6. Push origin。
+7. GitHub Pages 完成後確認 App 顯示 v2.2.1。
 
-把 `PASTE_YOUR_SB_PUBLISHABLE_KEY_HERE` 換成 Supabase Settings → API Keys 的 `sb_publishable_...`。
-
-不要使用 `sb_secret_...`、service_role 或 Database password。
-
-## 更新 GitHub
-1. 先在目前 v2.1.0 的主畫面 App 匯出一份 JSON。
-2. 將本資料夾所有檔案覆蓋到 GitHub repository `dream-garage` 根目錄。
-3. GitHub Desktop Summary：`Update Dream Garage v2.2.0 Cloud Sync`
-4. Commit to main
-5. Push origin
-6. 等 GitHub Pages 部署完成。
-
-## 第一次登入
-第一台有正式資料的裝置：選「上傳本機資料到雲端」。
-第二台裝置：登入同帳號後選「使用雲端資料」。
+## 驗證
+保留目前那筆刪不掉的 $200：
+1. iPhone → 存錢 → 刪除 $200。
+2. 應該立即從清單消失。
+3. 更多 → 立即同步。
+4. Mac → 立即同步。
+5. Mac 端也應看不到 $200。
